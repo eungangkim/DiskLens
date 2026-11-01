@@ -1,0 +1,36 @@
+# 배포 설정 (ARCHITECTURE.md §12). 코드 서명은 하지 않는다(SmartScreen 경고 → README 안내).
+appId: com.disklens.app
+productName: DiskLens
+copyright: DiskLens
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+# 규칙 DB 는 앱 코드(asar) 밖 resources 폴더에 둔다 (main 이 process.resourcesPath 에서 읽기 전용으로 읽는다)
+extraResources:
+  - from: resources/cleanup-rules.json
+    to: cleanup-rules.json
+asar: true
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: build/icon.ico
+  # 관리자 권한은 기본으로 요구하지 않는다. 필요한 정리 항목에서만 UAC 로 헬퍼를 따로 띄운다 (SAFETY.md §7)
+  requestedExecutionLevel: asInvoker
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: DiskLens
+  deleteAppDataOnUninstall: false # 지우기 전에 사용자에게 묻는다 (build/installer.nsh)
+  include: build/installer.nsh
+  artifactName: DiskLens-Setup-${version}.${ext}
+portable:
+  artifactName: DiskLens-Portable-${version}.${ext}

@@ -1,0 +1,8 @@
+node_modules
+out
+dist
+.electron-dist
+.electron-dist2
+test-results
+release
+build/*.tmp

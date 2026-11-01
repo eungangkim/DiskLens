@@ -1,0 +1,1504 @@
+{
+  "schemaVersion": 1,
+  "rulesVersion": "2026.11.02",
+  "description": "DiskLens 내장 규칙 시드. cleanable=false 규칙은 표시 전용(설명/안전도만 보여주고 앱에서 삭제 불가)이다. 규칙 추가 시 DATA_SPEC.md §5 가이드를 따른다.",
+  "pathRules": [
+    {
+      "id": "win-user-temp",
+      "name": "사용자 임시 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Temp"
+      },
+      "category": "temp",
+      "safety": "safe",
+      "description": "프로그램이 작업 중에 잠깐 만들어 두는 임시 파일 보관 폴더입니다.",
+      "impact": "대부분 필요할 때 다시 만들어집니다. 사용 중인 파일은 건너뜁니다. 설치 프로그램이 실행 중이라면 끝난 뒤에 정리하세요.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "minAgeDays": 1,
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "Windows",
+        "defaultSelected": true
+      },
+      "tags": ["임시", "temp"],
+      "reference": "Windows 사용자별 임시 폴더. 프로그램 종료 후 남은 파일이 대부분."
+    },
+    {
+      "id": "win-system-temp",
+      "name": "Windows 임시 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\Temp"
+      },
+      "category": "temp",
+      "safety": "safe",
+      "description": "Windows와 설치 프로그램이 시스템 전체 범위에서 쓰는 임시 폴더입니다.",
+      "impact": "필요할 때 다시 만들어집니다. 사용 중인 파일은 건너뜁니다. 관리자 권한이 필요합니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "minAgeDays": 1,
+        "requiresAdmin": true,
+        "allowPermanent": true,
+        "group": "Windows",
+        "defaultSelected": true
+      },
+      "tags": ["임시", "temp", "관리자"],
+      "reference": "SAFETY.md §5 정리 허용 예외."
+    },
+    {
+      "id": "win-thumbcache",
+      "name": "썸네일/아이콘 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "탐색기가 사진/동영상 미리보기와 아이콘을 빠르게 보여주려고 저장해 둔 캐시입니다.",
+      "impact": "지우면 탐색기가 미리보기를 다시 만들어서 폴더를 처음 열 때 잠깐 느릴 수 있습니다. 탐색기가 쓰고 있는 파일은 건너뜁니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "includeGlobs": ["thumbcache_*.db"],
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "Windows",
+        "defaultSelected": true
+      },
+      "tags": ["썸네일", "캐시"],
+      "reference": "SAFETY.md §5. 파일 이름 패턴으로만 정리."
+    },
+    {
+      "id": "win-crashdumps",
+      "name": "프로그램 오류 덤프",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\CrashDumps"
+      },
+      "category": "dump",
+      "safety": "safe",
+      "description": "프로그램이 비정상 종료될 때 원인 분석용으로 저장된 덤프 파일입니다.",
+      "impact": "개발자에게 오류를 전달할 일이 없다면 지워도 됩니다. 일부 덤프는 수백 MB~수 GB일 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": false,
+        "group": "Windows",
+        "defaultSelected": true
+      },
+      "tags": ["덤프", "크래시"],
+      "reference": "SAFETY.md §5."
+    },
+    {
+      "id": "win-minidump",
+      "name": "Windows 오류(블루스크린) 미니덤프",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\Minidump"
+      },
+      "category": "dump",
+      "safety": "safe",
+      "description": "Windows가 심각한 오류(블루스크린)를 일으켰을 때 남긴 작은 분석용 파일입니다.",
+      "impact": "원인 분석이 끝났다면 지워도 됩니다. 관리자 권한이 필요합니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": true,
+        "allowPermanent": false,
+        "group": "Windows",
+        "defaultSelected": false
+      },
+      "tags": ["덤프", "관리자"],
+      "reference": "SAFETY.md §5."
+    },
+    {
+      "id": "win-cbs-logs",
+      "name": "Windows 서비스 로그(CBS) 오래된 파일",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\Logs\\CBS"
+      },
+      "category": "log",
+      "safety": "safe",
+      "description": "Windows 업데이트/구성요소 설치 과정이 기록된 로그 파일입니다.",
+      "impact": "30일 지난 로그만 정리합니다. 업데이트 문제를 조사 중이라면 남겨 두세요. 관리자 권한이 필요합니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "includeGlobs": ["*.log"],
+        "minAgeDays": 30,
+        "requiresAdmin": true,
+        "allowPermanent": false,
+        "group": "Windows",
+        "defaultSelected": false
+      },
+      "tags": ["로그", "관리자"],
+      "reference": "SAFETY.md §5. *.log 패턴만 허용."
+    },
+    {
+      "id": "win-update-download",
+      "name": "Windows 업데이트 다운로드 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\SoftwareDistribution\\Download"
+      },
+      "category": "cache",
+      "safety": "caution",
+      "description": "Windows 업데이트 설치 파일을 내려받아 임시로 보관하는 폴더입니다.",
+      "impact": "Windows 업데이트가 진행 중이면 오류가 날 수 있으니 업데이트가 끝난 뒤에 정리하세요. 필요한 파일은 다시 내려받습니다. 관리자 권한이 필요합니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": true,
+        "allowPermanent": true,
+        "group": "Windows",
+        "defaultSelected": false
+      },
+      "tags": ["업데이트", "관리자"],
+      "reference": "SAFETY.md §5. 업데이트 서비스 사용 중이면 건너뜀."
+    },
+    {
+      "id": "win-old",
+      "name": "이전 Windows 설치(Windows.old)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%SYSTEMDRIVE%\\Windows.old"
+      },
+      "category": "update",
+      "safety": "caution",
+      "description": "Windows를 업그레이드하기 전 상태를 보관한 폴더입니다. 보통 수십 GB입니다.",
+      "impact": "지우면 이전 Windows 버전으로 되돌릴 수 없습니다. 직접 지우지 않고 Windows 디스크 정리 도구를 호출해 정리합니다. 관리자 권한이 필요합니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "self",
+        "requiresAdmin": true,
+        "allowPermanent": false,
+        "group": "Windows",
+        "defaultSelected": false,
+        "specialAction": "run-disk-cleanup"
+      },
+      "tags": ["업그레이드", "대용량", "관리자"],
+      "reference": "SAFETY.md §5. Windows 디스크 정리 호출 권장."
+    },
+    {
+      "id": "recycle-bin",
+      "name": "휴지통",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%SYSTEMDRIVE%\\$Recycle.Bin"
+      },
+      "category": "other",
+      "safety": "caution",
+      "description": "삭제한 파일이 완전히 지워지기 전에 머무는 곳입니다.",
+      "impact": "비우면 안에 있는 파일을 되돌릴 수 없습니다. 앱은 파일을 직접 지우지 않고 시스템의 '휴지통 비우기' 기능을 호출합니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": false,
+        "group": "Windows",
+        "defaultSelected": false,
+        "specialAction": "empty-recycle-bin"
+      },
+      "tags": ["휴지통"],
+      "reference": "SAFETY.md §3.1, §8. 전용 API로만 처리."
+    },
+    {
+      "id": "chrome-profile",
+      "name": "Chrome 사용자 프로필",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data"
+      },
+      "category": "app-data",
+      "safety": "protected",
+      "description": "Chrome의 로그인 정보, 북마크, 확장 프로그램, 방문 기록 등이 들어 있는 프로필 폴더입니다.",
+      "impact": "지우면 로그인/북마크/확장 프로그램 설정이 사라집니다. 이 안의 캐시 폴더만 정리 항목으로 따로 제공됩니다.",
+      "cleanable": false,
+      "tags": ["브라우저"]
+    },
+    {
+      "id": "chrome-cache",
+      "name": "Chrome 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Chrome이 웹페이지를 빠르게 불러오려고 저장해 둔 임시 데이터입니다.",
+      "impact": "처음 방문하는 사이트가 잠시 느려질 수 있습니다. 로그인은 유지됩니다. Chrome이 켜져 있으면 일부 파일은 건너뜁니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["chrome.exe"]
+      },
+      "tags": ["브라우저", "캐시", "chrome"]
+    },
+    {
+      "id": "chrome-code-cache",
+      "name": "Chrome 코드 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\Code Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Chrome이 웹사이트의 자바스크립트를 더 빨리 실행하려고 미리 처리해 둔 데이터입니다.",
+      "impact": "다음 방문 때 다시 만들어집니다. 로그인은 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["chrome.exe"]
+      },
+      "tags": ["브라우저", "캐시", "chrome"]
+    },
+    {
+      "id": "chrome-gpu-cache",
+      "name": "Chrome GPU 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\GPUCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Chrome이 화면 그리기를 빠르게 하려고 저장한 그래픽 관련 캐시입니다.",
+      "impact": "다시 만들어지며 처음 몇 번만 약간 느릴 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["chrome.exe"]
+      },
+      "tags": ["브라우저", "캐시", "chrome"]
+    },
+    {
+      "id": "edge-profile",
+      "name": "Edge 사용자 프로필",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data"
+      },
+      "category": "app-data",
+      "safety": "protected",
+      "description": "Edge의 로그인 정보, 즐겨찾기, 확장 프로그램, 방문 기록 등이 들어 있는 프로필 폴더입니다.",
+      "impact": "지우면 로그인/즐겨찾기/확장 프로그램 설정이 사라집니다. 이 안의 캐시 폴더만 정리 항목으로 따로 제공됩니다.",
+      "cleanable": false,
+      "tags": ["브라우저"]
+    },
+    {
+      "id": "edge-cache",
+      "name": "Edge 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Edge가 웹페이지를 빠르게 불러오려고 저장해 둔 임시 데이터입니다.",
+      "impact": "처음 방문하는 사이트가 잠시 느려질 수 있습니다. 로그인은 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["msedge.exe"]
+      },
+      "tags": ["브라우저", "캐시", "edge"]
+    },
+    {
+      "id": "edge-code-cache",
+      "name": "Edge 코드 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\Code Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Edge가 자바스크립트 실행을 빠르게 하려고 미리 처리해 둔 데이터입니다.",
+      "impact": "다음 방문 때 다시 만들어집니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["msedge.exe"]
+      },
+      "tags": ["브라우저", "캐시", "edge"]
+    },
+    {
+      "id": "edge-gpu-cache",
+      "name": "Edge GPU 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\GPUCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Edge가 화면 그리기를 빠르게 하려고 저장한 그래픽 관련 캐시입니다.",
+      "impact": "다시 만들어지며 처음 몇 번만 약간 느릴 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["msedge.exe"]
+      },
+      "tags": ["브라우저", "캐시", "edge"]
+    },
+    {
+      "id": "whale-profile",
+      "name": "네이버 웨일 사용자 프로필",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Naver\\Naver Whale\\User Data"
+      },
+      "category": "app-data",
+      "safety": "protected",
+      "description": "네이버 웨일의 로그인 정보, 북마크, 확장 프로그램, 방문 기록 등이 들어 있는 프로필 폴더입니다.",
+      "impact": "지우면 로그인/북마크/확장 프로그램 설정이 사라집니다. 이 안의 캐시 폴더만 정리 항목으로 따로 제공됩니다.",
+      "cleanable": false,
+      "tags": ["브라우저"]
+    },
+    {
+      "id": "whale-cache",
+      "name": "네이버 웨일 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Naver\\Naver Whale\\User Data\\*\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "웨일이 웹페이지를 빠르게 불러오려고 저장해 둔 임시 데이터입니다.",
+      "impact": "처음 방문하는 사이트가 잠시 느려질 수 있습니다. 로그인은 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["whale.exe"]
+      },
+      "tags": ["브라우저", "캐시", "whale"]
+    },
+    {
+      "id": "whale-code-cache",
+      "name": "네이버 웨일 코드 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Naver\\Naver Whale\\User Data\\*\\Code Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "웨일이 자바스크립트 실행을 빠르게 하려고 미리 처리해 둔 데이터입니다.",
+      "impact": "다음 방문 때 다시 만들어집니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["whale.exe"]
+      },
+      "tags": ["브라우저", "캐시", "whale"]
+    },
+    {
+      "id": "whale-gpu-cache",
+      "name": "네이버 웨일 GPU 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Naver\\Naver Whale\\User Data\\*\\GPUCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "웨일이 화면 그리기를 빠르게 하려고 저장한 그래픽 관련 캐시입니다.",
+      "impact": "다시 만들어지며 처음 몇 번만 약간 느릴 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["whale.exe"]
+      },
+      "tags": ["브라우저", "캐시", "whale"]
+    },
+    {
+      "id": "firefox-cache",
+      "name": "Firefox 캐시",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles\\*\\cache2"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Firefox가 웹페이지를 빠르게 불러오려고 저장해 둔 임시 데이터입니다.",
+      "impact": "처음 방문하는 사이트가 잠시 느려질 수 있습니다. 로그인과 북마크는 다른 폴더에 있어 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "브라우저",
+        "defaultSelected": true,
+        "needsProcessClosed": ["firefox.exe"]
+      },
+      "tags": ["브라우저", "캐시", "firefox"]
+    },
+    {
+      "id": "npm-cache",
+      "name": "npm 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\npm-cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "npm이 내려받은 패키지를 재사용하려고 저장해 둔 캐시입니다.",
+      "impact": "다음 npm install 때 필요한 패키지를 다시 내려받습니다(설치 속도가 잠시 느려짐).",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true
+      },
+      "tags": ["개발", "npm", "캐시"]
+    },
+    {
+      "id": "pip-cache",
+      "name": "pip 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\pip\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Python 패키지 관리자(pip)가 내려받은 파일을 재사용하려고 저장한 캐시입니다.",
+      "impact": "다음 pip install 때 필요한 파일을 다시 내려받습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true
+      },
+      "tags": ["개발", "python", "캐시"]
+    },
+    {
+      "id": "yarn-cache",
+      "name": "Yarn 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Yarn\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Yarn이 내려받은 패키지를 재사용하려고 저장한 캐시입니다.",
+      "impact": "다음 설치 때 필요한 패키지를 다시 내려받습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true
+      },
+      "tags": ["개발", "yarn", "캐시"]
+    },
+    {
+      "id": "nuget-http-cache",
+      "name": "NuGet 웹 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\NuGet\\v3-cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": ".NET 패키지 관리자(NuGet)가 서버 응답을 임시로 저장해 둔 캐시입니다.",
+      "impact": "다음 복원(restore) 때 서버에서 다시 받아옵니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true
+      },
+      "tags": ["개발", "nuget", "캐시"]
+    },
+    {
+      "id": "gradle-caches",
+      "name": "Gradle 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\.gradle\\caches"
+      },
+      "category": "cache",
+      "safety": "caution",
+      "description": "Gradle 빌드가 내려받은 라이브러리와 빌드 결과를 재사용하려고 저장한 캐시입니다. 용량이 커질 수 있습니다.",
+      "impact": "지우면 다음 빌드 때 라이브러리를 모두 다시 내려받아 첫 빌드가 오래 걸립니다. 오프라인 환경이면 빌드가 실패할 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": false
+      },
+      "tags": ["개발", "gradle", "캐시"]
+    },
+    {
+      "id": "electron-cache",
+      "name": "Electron 다운로드 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\electron\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Electron 앱 개발/빌드 시 내려받은 Electron 실행 파일 묶음을 보관하는 캐시입니다.",
+      "impact": "다음 설치/빌드 때 필요한 버전을 다시 내려받습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true
+      },
+      "tags": ["개발", "electron", "캐시"]
+    },
+    {
+      "id": "electron-builder-cache",
+      "name": "electron-builder 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\electron-builder\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "electron-builder가 설치 파일을 만들 때 쓰는 도구/바이너리 캐시입니다.",
+      "impact": "다음 빌드(npm run dist) 때 필요한 도구를 다시 내려받아 첫 빌드가 오래 걸립니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true
+      },
+      "tags": ["개발", "electron", "캐시"]
+    },
+    {
+      "id": "vscode-cache",
+      "name": "VS Code 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%APPDATA%\\Code\\Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "Visual Studio Code가 화면과 자원을 빠르게 불러오려고 저장한 캐시입니다.",
+      "impact": "VS Code를 다시 열 때 자동으로 다시 만들어집니다. 설정/확장 프로그램은 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true,
+        "needsProcessClosed": ["Code.exe"]
+      },
+      "tags": ["개발", "vscode", "캐시"]
+    },
+    {
+      "id": "vscode-code-cache",
+      "name": "VS Code 코드 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%APPDATA%\\Code\\Code Cache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "VS Code 내부 웹 엔진이 자바스크립트를 빠르게 실행하려고 미리 처리해 둔 캐시입니다.",
+      "impact": "다시 만들어집니다. 설정/확장 프로그램은 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true,
+        "needsProcessClosed": ["Code.exe"]
+      },
+      "tags": ["개발", "vscode", "캐시"]
+    },
+    {
+      "id": "vscode-cached-data",
+      "name": "VS Code 캐시 데이터",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%APPDATA%\\Code\\CachedData"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "VS Code가 시작 속도를 높이려고 저장한 미리 처리된 코드 데이터입니다. 버전이 바뀌면 이전 버전 데이터가 남습니다.",
+      "impact": "다시 만들어집니다. 설정/확장 프로그램은 유지됩니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true,
+        "needsProcessClosed": ["Code.exe"]
+      },
+      "tags": ["개발", "vscode", "캐시"]
+    },
+    {
+      "id": "vscode-gpu-cache",
+      "name": "VS Code GPU 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%APPDATA%\\Code\\GPUCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "VS Code가 화면 그리기를 빠르게 하려고 저장한 그래픽 관련 캐시입니다.",
+      "impact": "다시 만들어집니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "개발 도구",
+        "defaultSelected": true,
+        "needsProcessClosed": ["Code.exe"]
+      },
+      "tags": ["개발", "vscode", "캐시"]
+    },
+    {
+      "id": "d3d-shader-cache",
+      "name": "DirectX 셰이더 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\D3DSCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "게임/프로그램이 그래픽 효과(셰이더)를 빨리 불러오려고 Windows가 저장해 둔 캐시입니다.",
+      "impact": "지우면 게임을 처음 실행할 때 셰이더를 다시 만드느라 잠깐 끊기거나 로딩이 길어질 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "그래픽",
+        "defaultSelected": false
+      },
+      "tags": ["그래픽", "셰이더", "게임"]
+    },
+    {
+      "id": "nvidia-dx-cache",
+      "name": "NVIDIA DirectX 셰이더 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\NVIDIA\\DXCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "NVIDIA 그래픽 드라이버가 셰이더를 빨리 불러오려고 저장해 둔 캐시입니다.",
+      "impact": "지우면 게임을 처음 실행할 때 셰이더를 다시 만드느라 잠깐 끊기거나 로딩이 길어질 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "그래픽",
+        "defaultSelected": false
+      },
+      "tags": ["그래픽", "셰이더", "nvidia"]
+    },
+    {
+      "id": "nvidia-gl-cache",
+      "name": "NVIDIA OpenGL 셰이더 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\NVIDIA\\GLCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "NVIDIA 그래픽 드라이버가 OpenGL/Vulkan 셰이더를 저장해 둔 캐시입니다.",
+      "impact": "지우면 해당 프로그램을 처음 실행할 때 셰이더를 다시 만들어 잠깐 느릴 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "그래픽",
+        "defaultSelected": false
+      },
+      "tags": ["그래픽", "셰이더", "nvidia"]
+    },
+    {
+      "id": "amd-dx-cache",
+      "name": "AMD 셰이더 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\AMD\\DxCache"
+      },
+      "category": "cache",
+      "safety": "safe",
+      "description": "AMD 그래픽 드라이버가 셰이더를 빨리 불러오려고 저장해 둔 캐시입니다.",
+      "impact": "지우면 게임을 처음 실행할 때 셰이더를 다시 만들어 잠깐 끊길 수 있습니다.",
+      "cleanable": true,
+      "cleanup": {
+        "mode": "contents",
+        "requiresAdmin": false,
+        "allowPermanent": true,
+        "group": "그래픽",
+        "defaultSelected": false
+      },
+      "tags": ["그래픽", "셰이더", "amd"]
+    },
+    {
+      "id": "dev-node-modules",
+      "name": "node_modules (npm 패키지 설치 폴더)",
+      "match": {
+        "kind": "name",
+        "pattern": "node_modules"
+      },
+      "category": "dev-build",
+      "safety": "caution",
+      "description": "Node.js 프로젝트가 사용하는 라이브러리가 설치된 폴더입니다. 용량이 매우 큰 경우가 많습니다.",
+      "impact": "프로젝트 폴더에서 npm install을 다시 실행하면 복구됩니다. 이 앱에서는 삭제를 지원하지 않으니 필요하면 탐색기에서 직접 정리하세요.",
+      "cleanable": false,
+      "tags": ["개발", "표시전용"]
+    },
+    {
+      "id": "dev-unity-library",
+      "name": "Library (Unity 프로젝트 캐시일 수 있음)",
+      "match": {
+        "kind": "name",
+        "pattern": "Library"
+      },
+      "category": "dev-build",
+      "safety": "caution",
+      "description": "Unity 프로젝트 안의 Library 폴더라면 에셋을 변환해 저장한 작업 캐시입니다. 같은 이름의 다른 폴더일 수도 있으니 위치를 확인하세요.",
+      "impact": "Unity 프로젝트의 Library라면 지워도 프로젝트를 열 때 다시 만들어지지만 시간이 오래 걸릴 수 있습니다. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "unity", "표시전용"]
+    },
+    {
+      "id": "dev-nuget-packages",
+      "name": "NuGet 전역 패키지 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\.nuget\\packages"
+      },
+      "category": "dev-cache",
+      "safety": "caution",
+      "description": ".NET/Unity 프로젝트가 사용하는 패키지를 모아 둔 전역 폴더입니다.",
+      "impact": "지우면 다음 복원 때 필요한 패키지를 다시 내려받습니다. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "nuget", "표시전용"]
+    },
+    {
+      "id": "dev-maven-repo",
+      "name": "Maven 로컬 저장소",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\.m2\\repository"
+      },
+      "category": "dev-cache",
+      "safety": "caution",
+      "description": "Java/Maven 프로젝트가 내려받은 라이브러리를 모아 둔 폴더입니다.",
+      "impact": "지우면 다음 빌드 때 모두 다시 내려받습니다. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "maven", "표시전용"]
+    },
+    {
+      "id": "dev-unity-cache",
+      "name": "Unity 패키지/에셋 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Unity\\cache"
+      },
+      "category": "dev-cache",
+      "safety": "caution",
+      "description": "Unity가 내려받은 패키지와 에셋 스토어 자료를 보관하는 캐시입니다.",
+      "impact": "지우면 필요할 때 다시 내려받습니다. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "unity", "표시전용"]
+    },
+    {
+      "id": "dev-unity-hub-editors",
+      "name": "Unity 에디터 설치 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%PROGRAMFILES%\\Unity\\Hub\\Editor"
+      },
+      "category": "program",
+      "safety": "protected",
+      "description": "Unity Hub로 설치한 Unity 에디터 버전들이 있는 폴더입니다. 버전당 수 GB입니다.",
+      "impact": "폴더를 직접 지우지 마세요. 쓰지 않는 버전은 Unity Hub에서 제거하거나 프로그램 목록에서 제거하세요.",
+      "cleanable": false,
+      "tags": ["개발", "unity", "프로그램"]
+    },
+    {
+      "id": "game-steam-common",
+      "name": "Steam 게임 설치 폴더",
+      "match": {
+        "kind": "glob",
+        "pattern": "**\\steamapps\\common"
+      },
+      "category": "game",
+      "safety": "caution",
+      "description": "Steam으로 설치한 게임들이 들어 있는 폴더입니다. 게임 하나가 수십~수백 GB일 수 있습니다.",
+      "impact": "폴더를 직접 지우면 Steam이 설치 정보를 잘못 인식할 수 있습니다. Steam 라이브러리에서 '제거'를 사용하세요. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["게임", "steam", "표시전용"]
+    },
+    {
+      "id": "game-riot",
+      "name": "Riot Games 설치 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%SYSTEMDRIVE%\\Riot Games"
+      },
+      "category": "game",
+      "safety": "caution",
+      "description": "Riot 클라이언트와 Riot 게임(리그 오브 레전드 등)이 설치된 폴더입니다.",
+      "impact": "폴더를 직접 지우지 말고 Riot 클라이언트나 프로그램 목록에서 제거하세요. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["게임", "riot", "표시전용"]
+    },
+    {
+      "id": "vm-docker",
+      "name": "Docker Desktop 데이터",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Docker"
+      },
+      "category": "vm",
+      "safety": "protected",
+      "description": "Docker Desktop의 컨테이너/이미지 데이터가 들어 있는 가상 디스크가 있는 폴더입니다. 수십 GB까지 커질 수 있습니다.",
+      "impact": "직접 지우면 모든 컨테이너와 이미지가 사라집니다. 용량을 줄이려면 Docker 안에서 사용하지 않는 이미지/컨테이너를 정리(prune)하세요.",
+      "cleanable": false,
+      "tags": ["가상디스크", "docker"]
+    },
+    {
+      "id": "vm-wsl-distro",
+      "name": "WSL(리눅스) 가상 디스크",
+      "match": {
+        "kind": "glob",
+        "pattern": "%LOCALAPPDATA%\\Packages\\*\\LocalState\\ext4.vhdx"
+      },
+      "category": "vm",
+      "safety": "protected",
+      "description": "WSL에 설치된 리눅스 배포판의 전체 파일 시스템이 들어 있는 가상 디스크 파일입니다.",
+      "impact": "삭제하면 해당 리눅스 환경의 모든 파일이 사라집니다. 용량을 줄이려면 WSL 안에서 불필요한 파일을 지운 뒤 가상 디스크 압축 기능을 사용하세요.",
+      "cleanable": false,
+      "tags": ["가상디스크", "wsl"]
+    },
+    {
+      "id": "sys-pagefile",
+      "name": "가상 메모리 파일(pagefile.sys)",
+      "match": {
+        "kind": "exact",
+        "pattern": "%SYSTEMDRIVE%\\pagefile.sys"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "메모리가 부족할 때 디스크를 임시 메모리로 쓰기 위한 Windows 시스템 파일입니다.",
+      "impact": "삭제할 수 없습니다. 크기를 조절하려면 Windows 설정의 '성능 옵션 → 가상 메모리'를 사용하세요. 너무 줄이면 프로그램이 불안정해질 수 있습니다.",
+      "cleanable": false,
+      "tags": ["시스템", "대용량"]
+    },
+    {
+      "id": "sys-hiberfil",
+      "name": "최대 절전 모드 파일(hiberfil.sys)",
+      "match": {
+        "kind": "exact",
+        "pattern": "%SYSTEMDRIVE%\\hiberfil.sys"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "최대 절전 모드와 '빠른 시작'을 위해 메모리 내용을 저장해 두는 Windows 시스템 파일입니다. 보통 수 GB~수십 GB입니다.",
+      "impact": "직접 삭제할 수 없습니다. 용량을 줄이려면 Windows의 전원 설정에서 최대 절전 모드를 끄는 방법이 있으며, 이 경우 '빠른 시작'도 함께 꺼집니다.",
+      "cleanable": false,
+      "tags": ["시스템", "대용량"]
+    },
+    {
+      "id": "sys-swapfile",
+      "name": "앱 스왑 파일(swapfile.sys)",
+      "match": {
+        "kind": "exact",
+        "pattern": "%SYSTEMDRIVE%\\swapfile.sys"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "Windows 스토어 앱의 메모리 관리를 위한 시스템 파일입니다.",
+      "impact": "삭제할 수 없습니다. 가상 메모리 설정과 함께 관리됩니다.",
+      "cleanable": false,
+      "tags": ["시스템"]
+    },
+    {
+      "id": "sys-volume-information",
+      "name": "시스템 복원 지점(System Volume Information)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%SYSTEMDRIVE%\\System Volume Information"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "시스템 복원 지점과 볼륨 섀도 복사본이 저장되는 보호 폴더입니다.",
+      "impact": "직접 접근/삭제할 수 없습니다. 용량을 줄이려면 '시스템 보호' 설정에서 복원 지점에 쓰는 최대 공간을 조절하세요.",
+      "cleanable": false,
+      "tags": ["시스템", "복원"]
+    },
+    {
+      "id": "sys-windows",
+      "name": "Windows 시스템 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "Windows 운영체제 본체가 들어 있는 폴더입니다.",
+      "impact": "삭제하면 Windows가 부팅되지 않거나 심각하게 손상됩니다. 안전하게 정리할 수 있는 일부 하위 항목(임시, 업데이트 캐시 등)만 정리 화면에 따로 제공됩니다.",
+      "cleanable": false,
+      "tags": ["시스템"]
+    },
+    {
+      "id": "sys-winsxs",
+      "name": "Windows 구성요소 저장소(WinSxS)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\WinSxS"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "Windows 구성요소와 업데이트 파일을 보관하는 저장소입니다. 다른 폴더와 파일을 공유하는 구조라 실제 차지하는 용량은 표시된 값보다 작을 수 있습니다.",
+      "impact": "직접 지우면 Windows 업데이트와 복구가 망가집니다. 정리가 필요하면 Windows 디스크 정리의 'Windows 업데이트 정리'를 사용하세요.",
+      "cleanable": false,
+      "tags": ["시스템", "대용량"]
+    },
+    {
+      "id": "sys-installer-cache",
+      "name": "Windows Installer 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\Installer"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "프로그램을 제거하거나 수리할 때 필요한 설치 정보(MSI) 파일을 보관하는 폴더입니다.",
+      "impact": "지우면 해당 프로그램을 제거/수리할 수 없게 될 수 있습니다.",
+      "cleanable": false,
+      "tags": ["시스템", "설치"]
+    },
+    {
+      "id": "sys-driverstore",
+      "name": "드라이버 저장소(DriverStore)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%WINDIR%\\System32\\DriverStore"
+      },
+      "category": "system",
+      "safety": "protected",
+      "description": "장치 드라이버 설치 파일을 보관하는 Windows 폴더입니다.",
+      "impact": "지우면 장치(그래픽, 소리, 네트워크 등)가 정상 동작하지 않을 수 있습니다.",
+      "cleanable": false,
+      "tags": ["시스템", "드라이버"]
+    },
+    {
+      "id": "sys-program-files",
+      "name": "Program Files (설치된 프로그램)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%PROGRAMFILES%"
+      },
+      "category": "program",
+      "safety": "protected",
+      "description": "64비트 프로그램이 설치되는 폴더입니다.",
+      "impact": "폴더를 직접 지우면 프로그램이 손상됩니다. 프로그램 탭에서 해당 프로그램의 제거 기능을 사용하세요.",
+      "cleanable": false,
+      "tags": ["프로그램"]
+    },
+    {
+      "id": "sys-program-files-x86",
+      "name": "Program Files (x86) (설치된 프로그램)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%PROGRAMFILES(X86)%"
+      },
+      "category": "program",
+      "safety": "protected",
+      "description": "32비트 프로그램이 설치되는 폴더입니다.",
+      "impact": "폴더를 직접 지우면 프로그램이 손상됩니다. 프로그램 탭에서 해당 프로그램의 제거 기능을 사용하세요.",
+      "cleanable": false,
+      "tags": ["프로그램"]
+    },
+    {
+      "id": "sys-programdata",
+      "name": "ProgramData (프로그램 공용 데이터)",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%PROGRAMDATA%"
+      },
+      "category": "app-data",
+      "safety": "protected",
+      "description": "설치된 프로그램과 Windows가 모든 사용자 공용으로 쓰는 설정/데이터 폴더입니다.",
+      "impact": "임의로 지우면 프로그램 설정이 사라지거나 동작하지 않을 수 있습니다.",
+      "cleanable": false,
+      "tags": ["프로그램", "데이터"]
+    },
+    {
+      "id": "user-users-root",
+      "name": "Users 폴더",
+      "match": {
+        "kind": "exact",
+        "pattern": "%SYSTEMDRIVE%\\Users"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "컴퓨터 사용자별 폴더가 모여 있는 곳입니다.",
+      "impact": "삭제할 수 없습니다.",
+      "cleanable": false,
+      "tags": ["사용자"]
+    },
+    {
+      "id": "user-profile-root",
+      "name": "내 사용자 폴더",
+      "match": {
+        "kind": "exact",
+        "pattern": "%USERPROFILE%"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "내 계정의 문서, 사진, 바탕화면, 프로그램 설정이 모두 들어 있는 최상위 폴더입니다.",
+      "impact": "삭제할 수 없습니다. 안의 하위 폴더는 각각 규칙에 따라 표시됩니다.",
+      "cleanable": false,
+      "tags": ["사용자"]
+    },
+    {
+      "id": "user-appdata-local",
+      "name": "AppData\\Local (프로그램별 로컬 데이터)",
+      "match": {
+        "kind": "exact",
+        "pattern": "%LOCALAPPDATA%"
+      },
+      "category": "app-data",
+      "safety": "protected",
+      "description": "설치된 프로그램들이 이 컴퓨터에서만 쓰는 설정과 캐시를 저장하는 폴더입니다.",
+      "impact": "폴더 자체는 삭제할 수 없습니다. 안의 하위 폴더는 프로그램마다 다르며 규칙이 있는 캐시만 정리 항목으로 제공됩니다. 규칙이 없는 하위 폴더는 '알 수 없음'으로 표시됩니다.",
+      "cleanable": false,
+      "tags": ["사용자", "앱데이터"]
+    },
+    {
+      "id": "user-appdata-roaming",
+      "name": "AppData\\Roaming (프로그램별 사용자 설정)",
+      "match": {
+        "kind": "exact",
+        "pattern": "%APPDATA%"
+      },
+      "category": "app-data",
+      "safety": "protected",
+      "description": "프로그램들이 내 계정의 설정과 데이터를 저장하는 폴더입니다.",
+      "impact": "폴더 자체는 삭제할 수 없습니다. 규칙이 없는 하위 폴더는 '알 수 없음'으로 표시됩니다.",
+      "cleanable": false,
+      "tags": ["사용자", "앱데이터"]
+    },
+    {
+      "id": "user-documents",
+      "name": "문서 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\Documents"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "내가 만든 문서와 작업 파일이 있는 개인 폴더입니다.",
+      "impact": "개인 파일이므로 이 앱에서는 삭제를 지원하지 않습니다. 필요 없는 파일은 탐색기에서 직접 확인해 정리하세요.",
+      "cleanable": false,
+      "tags": ["사용자", "개인파일"]
+    },
+    {
+      "id": "user-desktop",
+      "name": "바탕화면 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\Desktop"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "바탕화면에 놓인 파일과 바로가기가 저장된 개인 폴더입니다.",
+      "impact": "개인 파일이므로 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["사용자", "개인파일"]
+    },
+    {
+      "id": "user-downloads",
+      "name": "다운로드 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\Downloads"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "인터넷에서 내려받은 파일이 저장되는 개인 폴더입니다. 오래된 설치 파일이 쌓여 용량이 커지기 쉽습니다.",
+      "impact": "개인 파일이므로 이 앱에서는 삭제를 지원하지 않습니다. 큰 파일 목록에서 확인한 뒤 탐색기에서 직접 정리하세요.",
+      "cleanable": false,
+      "tags": ["사용자", "개인파일"]
+    },
+    {
+      "id": "user-pictures",
+      "name": "사진 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\Pictures"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "사진과 스크린샷이 저장되는 개인 폴더입니다.",
+      "impact": "개인 파일이므로 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["사용자", "개인파일"]
+    },
+    {
+      "id": "user-videos",
+      "name": "동영상 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\Videos"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "동영상과 녹화 파일이 저장되는 개인 폴더입니다. 용량이 커지기 쉽습니다.",
+      "impact": "개인 파일이므로 이 앱에서는 삭제를 지원하지 않습니다. 큰 파일 목록에서 확인한 뒤 탐색기에서 직접 정리하세요.",
+      "cleanable": false,
+      "tags": ["사용자", "개인파일"]
+    },
+    {
+      "id": "user-music",
+      "name": "음악 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\Music"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "음악 파일이 저장되는 개인 폴더입니다.",
+      "impact": "개인 파일이므로 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["사용자", "개인파일"]
+    },
+    {
+      "id": "user-onedrive",
+      "name": "OneDrive 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\OneDrive"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "OneDrive와 동기화되는 개인 폴더입니다. '온라인 전용' 파일은 디스크 용량을 차지하지 않습니다.",
+      "impact": "여기서 지우면 클라우드의 파일도 함께 삭제될 수 있습니다. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["사용자", "클라우드", "개인파일"]
+    },
+    {
+      "id": "user-ssh",
+      "name": "SSH 키 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\.ssh"
+      },
+      "category": "user-data",
+      "safety": "protected",
+      "description": "서버/깃허브 접속에 쓰는 인증 키가 들어 있는 폴더입니다.",
+      "impact": "삭제하면 해당 키로 접속할 수 없게 됩니다. 키를 복구할 수 없을 수 있습니다.",
+      "cleanable": false,
+      "tags": ["사용자", "인증"]
+    },
+    {
+      "id": "vm-wsl-data",
+      "name": "WSL(리눅스) 데이터 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\wsl"
+      },
+      "category": "vm",
+      "safety": "protected",
+      "description": "최신 WSL이 리눅스 배포판의 전체 파일 시스템(ext4.vhdx 가상 디스크)을 보관하는 폴더입니다. 수십 GB까지 커질 수 있습니다.",
+      "impact": "직접 지우면 해당 리눅스 환경의 모든 파일이 사라집니다. 용량을 줄이려면 WSL 안에서 불필요한 파일을 지운 뒤 가상 디스크 압축 기능을 사용하세요.",
+      "cleanable": false,
+      "tags": ["가상디스크", "wsl", "표시전용"]
+    },
+    {
+      "id": "vm-virtualbox",
+      "name": "VirtualBox 가상 머신",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\VirtualBox VMs"
+      },
+      "category": "vm",
+      "safety": "protected",
+      "description": "VirtualBox 가상 머신의 디스크(.vdi)와 설정이 들어 있는 폴더입니다.",
+      "impact": "지우면 그 가상 머신과 안의 모든 파일이 사라집니다. 필요 없는 머신은 VirtualBox 안에서 제거하세요.",
+      "cleanable": false,
+      "tags": ["가상디스크", "virtualbox", "표시전용"]
+    },
+    {
+      "id": "dev-conda-pkgs",
+      "name": "Anaconda 패키지 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\anaconda3\\pkgs"
+      },
+      "category": "dev-cache",
+      "safety": "caution",
+      "description": "Anaconda가 내려받은 패키지를 보관하는 폴더입니다. 가상환경이 이 파일들을 링크로 함께 쓰고 있을 수 있습니다.",
+      "impact": "직접 지우면 환경이 깨지거나 다시 내려받아야 할 수 있습니다. 정리하려면 터미널에서 `conda clean --all`을 사용하세요. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "conda", "표시전용"]
+    },
+    {
+      "id": "dev-huggingface-cache",
+      "name": "Hugging Face 모델 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%USERPROFILE%\\.cache\\huggingface"
+      },
+      "category": "dev-cache",
+      "safety": "caution",
+      "description": "AI 모델/데이터셋을 내려받아 보관하는 폴더입니다. 모델 하나가 수 GB인 경우가 많습니다.",
+      "impact": "지우면 해당 모델을 쓰는 프로그램이 다음 실행 때 다시 내려받습니다(인터넷 필요). 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "ai", "표시전용"]
+    },
+    {
+      "id": "app-roblox-versions",
+      "name": "Roblox 설치 버전",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Roblox\\Versions"
+      },
+      "category": "game",
+      "safety": "caution",
+      "description": "Roblox 게임 클라이언트와 스튜디오 프로그램 파일이 들어 있는 폴더입니다.",
+      "impact": "지우면 Roblox가 실행되지 않아 다시 설치해야 합니다. 제거는 프로그램 탭이나 Windows 설정에서 하세요.",
+      "cleanable": false,
+      "tags": ["게임", "roblox", "표시전용"]
+    },
+    {
+      "id": "app-unreal-zen",
+      "name": "Unreal Engine Zen 데이터 캐시",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\UnrealEngine\\Common\\Zen"
+      },
+      "category": "dev-cache",
+      "safety": "caution",
+      "description": "언리얼 엔진이 에셋을 빠르게 불러오려고 저장해 둔 공유 캐시입니다. 수 GB까지 커질 수 있습니다.",
+      "impact": "지우면 다음에 프로젝트를 열 때 다시 만들어져 처음에는 느릴 수 있습니다. 이 앱에서는 삭제를 지원하지 않습니다.",
+      "cleanable": false,
+      "tags": ["개발", "unreal", "표시전용"]
+    },
+    {
+      "id": "app-uwp-packages",
+      "name": "Microsoft Store 앱 데이터",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Packages"
+      },
+      "category": "app-data",
+      "safety": "caution",
+      "description": "Microsoft Store로 설치한 앱들의 설정과 저장 데이터가 앱별 폴더로 들어 있습니다.",
+      "impact": "지우면 해당 앱의 설정과 로그인 정보가 사라질 수 있습니다. 앱 안의 정리 기능이나 Windows 설정 > 앱을 사용하세요.",
+      "cleanable": false,
+      "tags": ["앱데이터", "store", "표시전용"]
+    },
+    {
+      "id": "prog-vscode-install",
+      "name": "Visual Studio Code 설치 폴더",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%LOCALAPPDATA%\\Programs\\Microsoft VS Code"
+      },
+      "category": "program",
+      "safety": "caution",
+      "description": "Visual Studio Code 프로그램 파일이 설치된 폴더입니다.",
+      "impact": "직접 지우면 VS Code가 실행되지 않고 제거 정보가 남습니다. 제거는 프로그램 탭에서 하세요.",
+      "cleanable": false,
+      "tags": ["프로그램", "vscode", "표시전용"]
+    },
+    {
+      "id": "vscode-user-data",
+      "name": "VS Code 사용자 데이터",
+      "match": {
+        "kind": "prefix",
+        "pattern": "%APPDATA%\\Code"
+      },
+      "category": "app-data",
+      "safety": "caution",
+      "description": "VS Code의 사용자 설정, 작업 공간 기록, 저장되지 않은 파일 백업이 들어 있는 폴더입니다. 안의 캐시 폴더만 정리 항목으로 따로 제공됩니다.",
+      "impact": "지우면 설정과 작업 공간 기록이 사라집니다.",
+      "cleanable": false,
+      "tags": ["개발", "vscode", "표시전용"]
+    }
+  ],
+  "programRules": [
+    {
+      "id": "prog-vcredist",
+      "match": {
+        "nameContains": ["Visual C++", "Redistributable"]
+      },
+      "name": "Microsoft Visual C++ 재배포 패키지",
+      "category": "redistributable",
+      "safety": "caution",
+      "description": "많은 프로그램과 게임이 실행에 필요로 하는 공용 라이브러리입니다. 버전별로 여러 개가 설치되어 있는 것이 정상입니다.",
+      "impact": "지우면 이 라이브러리를 쓰는 프로그램이나 게임이 실행되지 않을 수 있습니다. 어떤 프로그램이 쓰는지 알 수 없다면 그대로 두세요."
+    },
+    {
+      "id": "prog-dotnet",
+      "match": {
+        "nameRegex": "\\.NET (Runtime|SDK|Core)|Windows Desktop Runtime|ASP\\.NET Core"
+      },
+      "name": ".NET 런타임/SDK",
+      "category": "runtime",
+      "safety": "caution",
+      "description": ".NET으로 만든 프로그램을 실행하거나 개발하는 데 필요한 런타임/도구입니다.",
+      "impact": "지우면 해당 버전을 쓰는 프로그램이 실행되지 않을 수 있습니다."
+    },
+    {
+      "id": "prog-java",
+      "match": {
+        "nameRegex": "^(Java( |\\()|JDK|Eclipse Temurin)"
+      },
+      "name": "Java 런타임/JDK",
+      "category": "runtime",
+      "safety": "caution",
+      "description": "Java로 만든 프로그램을 실행하거나 개발하는 데 필요한 런타임/도구입니다.",
+      "impact": "지우면 Java가 필요한 프로그램(일부 게임/개발 도구 등)이 실행되지 않을 수 있습니다."
+    },
+    {
+      "id": "prog-webview2",
+      "match": {
+        "nameContains": ["WebView2"]
+      },
+      "name": "Microsoft Edge WebView2 런타임",
+      "category": "runtime",
+      "safety": "caution",
+      "description": "여러 프로그램이 웹 화면을 표시하기 위해 사용하는 공용 구성요소입니다.",
+      "impact": "지우면 이를 사용하는 프로그램(오피스, 일부 데스크탑 앱 등)의 화면이 표시되지 않을 수 있습니다."
+    },
+    {
+      "id": "prog-edge",
+      "match": {
+        "nameRegex": "^Microsoft Edge$"
+      },
+      "name": "Microsoft Edge",
+      "category": "system",
+      "safety": "protected",
+      "description": "Windows에 기본 포함된 웹 브라우저입니다.",
+      "impact": "Windows와 깊게 연결되어 있어 일반적인 방법으로 제거하지 않는 것이 안전합니다."
+    },
+    {
+      "id": "prog-nvidia-driver",
+      "match": {
+        "nameRegex": "^NVIDIA (Graphics Driver|그래픽 드라이버|PhysX|HD Audio|Audio Driver|USB|Install Application|FrameView)"
+      },
+      "name": "NVIDIA 드라이버 구성요소",
+      "category": "driver",
+      "safety": "protected",
+      "description": "NVIDIA 그래픽 카드를 동작시키는 드라이버 구성요소입니다.",
+      "impact": "지우면 화면 해상도/게임 성능에 문제가 생기거나 화면이 제대로 나오지 않을 수 있습니다."
+    },
+    {
+      "id": "prog-gpu-chipset-driver",
+      "match": {
+        "nameRegex": "^(Intel(\\(R\\)|®) .*(Graphics|Chipset|Management Engine|Wireless|Bluetooth|Serial IO|Rapid Storage)|AMD (Chipset|Software|Radeon)|Realtek)"
+      },
+      "name": "그래픽/칩셋/오디오/네트워크 드라이버",
+      "category": "driver",
+      "safety": "protected",
+      "description": "메인보드, 그래픽, 소리, 네트워크 장치를 동작시키는 드라이버 구성요소입니다.",
+      "impact": "지우면 해당 장치가 동작하지 않거나 시스템이 불안정해질 수 있습니다."
+    },
+    {
+      "id": "prog-security-suite",
+      "match": {
+        "nameRegex": "(AhnLab|V3 |Kaspersky|Norton|McAfee|Avast|Bitdefender|ESET)"
+      },
+      "name": "보안 프로그램",
+      "category": "security",
+      "safety": "caution",
+      "description": "바이러스 검사와 실시간 보호를 담당하는 보안 프로그램입니다.",
+      "impact": "제거하면 PC가 보호되지 않는 상태가 될 수 있습니다. 다른 보안 프로그램을 쓰거나 Windows 보안이 켜져 있는지 확인한 뒤 제거하세요."
+    },
+    {
+      "id": "prog-docker-desktop",
+      "match": {
+        "nameContains": ["Docker Desktop"]
+      },
+      "name": "Docker Desktop",
+      "category": "dev-tool",
+      "safety": "caution",
+      "description": "컨테이너를 실행하는 개발 도구입니다.",
+      "impact": "제거하면 컨테이너와 이미지 데이터가 함께 사라질 수 있습니다. 필요한 데이터는 먼저 백업하세요."
+    },
+    {
+      "id": "prog-nodejs",
+      "match": {
+        "nameRegex": "^Node\\.js"
+      },
+      "name": "Node.js",
+      "category": "dev-tool",
+      "safety": "caution",
+      "description": "자바스크립트 개발 도구입니다. npm과 함께 설치됩니다.",
+      "impact": "제거하면 Node.js 기반 프로젝트와 개발 도구(Electron 앱 개발 포함)를 실행/빌드할 수 없습니다."
+    },
+    {
+      "id": "prog-unity-hub-editor",
+      "match": {
+        "nameRegex": "^(Unity Hub|Unity [0-9])"
+      },
+      "name": "Unity Hub / Unity 에디터",
+      "category": "dev-tool",
+      "safety": "safe",
+      "description": "Unity 게임 개발 도구입니다. 에디터 버전별로 수 GB를 차지합니다.",
+      "impact": "제거한 에디터 버전으로는 해당 프로젝트를 열 수 없습니다. 쓰지 않는 버전만 제거하세요."
+    }
+  ]
+}
