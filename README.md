@@ -4,7 +4,7 @@ Windows C드라이브의 용량을 폴더/파일별로 보여 주고, 각 항목
 
 ## 후원
 
-DiskLens가 도움이 되었다면 [커피 한 잔으로 응원](https://buymeacoffee.com/kimeungang)해 주세요. 후원은 선택 사항이며, 앱의 기능은 모두 무료입니다.
+DiskLens가 도움이 되었다면 [GitHub Sponsors](https://github.com/sponsors/eungangkim) 또는 [커피 한 잔](https://buymeacoffee.com/kimeungang)으로 응원해 주세요. 후원은 선택 사항이며, 앱의 기능은 모두 무료입니다.
 
 ## 설치
 
